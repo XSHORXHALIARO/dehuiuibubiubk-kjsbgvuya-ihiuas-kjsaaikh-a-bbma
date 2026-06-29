@@ -170,10 +170,11 @@ def show(currline): # show function examines whole line
     parts = currline[1:-1]
     parts = parts.split(',')
     for j in range(len(parts)):
-        if parts[j].startswith(' '):
-            parts[j] = parts[j][1:]
-        if parts[j].endswith(' '):
-            parts[j] = parts[j][:-1]
+        while parts[j].startswith(' ') or parts[j].endswith(' '): 
+            if parts[j].startswith(' '):
+                parts[j] = parts[j][1:]
+            if parts[j].endswith(' '):
+                parts[j] = parts[j][:-1]
         if '"' in parts[j]:
             parts[j] = parts[j][1:-1]
         elif parts[j].startswith('math('):
