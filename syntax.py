@@ -149,7 +149,7 @@ def mysymplify(expression): # maths simplifier ###finished
                 expression[i] = ''
                 expression[i-1] = ''
             elif expression[i] == '/':
-                expression[i+1] /= expression[i-1]
+                expression[i+1] = expression[i-1]/expression[i+1]
                 expression[i] = ''
                 expression[i-1] = ''
         expression = listclear(expression)
@@ -159,7 +159,7 @@ def mysymplify(expression): # maths simplifier ###finished
                 expression[i] = ''
                 expression[i-1] = ''
             elif expression[i] == '-':
-                expression[i+1] -= expression[i-1]
+                expression[i+1] = expression[i-1] - expression[i+1]
                 expression[i] = ''
                 expression[i-1] = ''
         expression = listclear(expression)
@@ -192,11 +192,15 @@ def var(currline):
         defin = currline[0]
         defin = defin.split(' ')
         defin = listclear(defin)
-        datatype  = defin[0]
-        datatypes.append(datatype)
         varname = defin[1]
-        varnames.append(varname)
-        varvalues.append(mysymplify(currline[1]))
+        datatype  = defin[0]
+        if varname in varnames:
+            datatypes[varnames.index(varname)] = datatype
+            varvalues[varnames.index(varname)] = mysymplify(currline[1])
+        else:
+            datatypes.append(datatype)
+            varnames.append(varname)
+            varvalues.append(mysymplify(currline[1]))
     elif '=' in currline:
         currline = currline.split('=', 1)
         while currline[1].startswith(' '):
@@ -205,23 +209,30 @@ def var(currline):
         defin = defin.split(' ')
         defin = listclear(defin)
         datatype  = defin[0]
-        datatypes.append(datatype)
         varname = defin[1]
-        varnames.append(varname)
-        currline[1] = currline[1].replace('"', '')
-        varvalues.append(currline[1])
+        if varname in varnames:
+            datatypes[varnames.index(varname)] = datatype
+            currline[1] = currline[1].replace('"', '')
+            varvalues[varnames.index(varname)] = currline[1]
+        else:
+            datatypes.append(datatype)
+            varnames.append(varname)
+            currline[1] = currline[1].replace('"', '')
+            varvalues.append(currline[1])
     else:
         currline = currline.split(' ')
         currline = listclear(currline)
         datatype  = currline[0]
-        datatypes.append(datatype)
         varname = currline[1]
-        varnames.append(varname)
+        if varname not in varnames:
+            datatypes.append(datatype)
+            varnames.append(varname)
+        else:
+            datatypes[varnames.index(varname)] = datatype
 ###########################################PARSER
 def numbercode(filename):
     if filename.endswith('.ncd'):
         line = 1
-        import maths
         with open(f'{filename}', 'r') as file:
             lines = file.readlines()
         while line <= len(lines):
