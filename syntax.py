@@ -6,7 +6,7 @@ datatypes = ['real', 'real', 'imaginary']
 funcnames = [] # in built functions
 customfuncnames = [] # user defined function
 customfunclinerange = [] # user defined function line range
-unitmodes = ['SI', 'IMPERIAL', 'NAURAL', 'STONEY', 'PLANCK'] # overall units for quantities
+unitmodes = ['SI', 'IMPERIAL', 'NATURAL', 'STONEY', 'PLANCK'] # overall units for quantities
 
 
 
@@ -160,9 +160,13 @@ def mysymplify(expression): # maths simplifier ###finished
                 expression[i] = ''
                 expression[i-1] = ''
             elif expression[i] == '-':
-                expression[i+1] = expression[i-1] - expression[i+1]
-                expression[i] = ''
-                expression[i-1] = ''
+                if i !=0:
+                    expression[i+1] = expression[i-1] - expression[i+1]
+                    expression[i] = ''
+                    expression[i-1] = ''
+                else:
+                    expression[i+1] *= -1
+                    expression[i] = ''
         expression = listclear(expression)
     return expression[0]
 ##########################################################PRINT
