@@ -6,6 +6,7 @@ datatypes = ['real', 'real', 'imaginary']
 funcnames = [] # in built functions
 customfuncnames = [] # user defined function
 customfunclinerange = [] # user defined function line range
+unitmodes = ['SI', 'IMPERIAL', 'NAURAL', 'STONEY', 'PLANCK'] # overall units for quantities
 
 
 
