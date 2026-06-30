@@ -1,5 +1,6 @@
 import math
-global varnames, varvalues, funcnames, funclinerange
+global varnames, varvalues, funcnames, funclinerange, currlinenumber, errormsg, filename
+filename = ''
 varnames = []
 varvalues = []
 datatypes = []
@@ -10,8 +11,8 @@ funcnames = [] # in built functions
 customfuncnames = [] # user defined function
 customfunclinerange = [] # user defined function line range
 unitmodes = ['SI', 'IMPERIAL', 'NATURAL', 'STONEY', 'PLANCK'] # overall units for quantities
-
-
+currlinenumber = 0
+errormsg = f'\nFILE NAME: {filename}:\nLINE NUMBER: {currlinenumber}:\n'
 
 
 
@@ -112,9 +113,13 @@ def mysymplify(expression): # maths simplifier ###finished
         if expression[i] in varnames:#variable replacement
             if datatypes[varnames.index(expression[i])] == 'real' or  datatypes[varnames.index(expression[i])] == 'complex' or datatypes[varnames.index(expression[i])] == 'imaginary':
                 expression[i] = varvalues[varnames.index(expression[i])] # replacement
+            else:
+                raise TypeError(f'{errormsg}Non-number variable: {expression[i]} cannot be used in a mathematical statement.')
         elif expression[i] in connames:#constant replacement
             if condatatypes[connames.index(expression[i])] == 'real' or  condatatypes[connames.index(expression[i])] == 'complex' or condatatypes[connames.index(expression[i])] == 'imaginary':
                 expression[i] = convalues[connames.index(expression[i])]
+            else:
+                raise TypeError(f'{errormsg}Non-number constant: "{expression[i]}" cannot be used in a mathematical statement.')
         try:
             expression[i] = float(expression[i])
         except:
@@ -189,10 +194,7 @@ def show(currline): # show function examines whole line
         if '"' in parts[j]:
             parts[j] = parts[j][1:-1]
         elif parts[j].startswith('math('):
-            try:
-                parts[j] = mysymplify(parts[j][5:-1])
-            except:
-                parts[j] = parts[j]
+            parts[j] = mysymplify(parts[j][5:-1])
         else:
             if parts[j] in connames:
                 parts[j] = convalues[connames.index(parts[j])]
@@ -218,7 +220,7 @@ def var(currline):
                 varnames.append(varname)
                 varvalues.append(mysymplify(currline[1]))
         else:
-            raise ValueError
+            raise NameError(f'{errormsg}Constant "{varname}" cannot be redefined')
     elif '=' in currline:
         currline = currline.split('=', 1)
         while currline[1].startswith(' '):
@@ -239,7 +241,7 @@ def var(currline):
                 currline[1] = currline[1].replace('"', '')
                 varvalues.append(currline[1])
         else:
-            raise ValueError
+            raise NameError(f'Constant "{varname}" cannot be redefined')
     else:
         currline = currline.split(' ')
         currline = listclear(currline)
@@ -252,7 +254,7 @@ def var(currline):
             else:
                 datatypes[varnames.index(varname)] = datatype
         else:
-            raise ValueError
+            raise NameError(f'{errormsg}Constant "{varname}" cannot be redefined')
 
 def const(currline):
     currline = currline[6:]
@@ -264,11 +266,14 @@ def const(currline):
         varname = defin[1]
         datatype  = defin[0]
         if varname not in connames and varname not in varnames:
-            datatypes.append(datatype)
-            varnames.append(varname)
-            varvalues.append(mysymplify(currline[1]))
+            condatatypes.append(datatype)
+            connames.append(varname)
+            convalues.append(mysymplify(currline[1]))
         else:
-            raise ValueError
+            if varname in varnames:
+                raise NameError(f'{errormsg}Variable "{varname}" cannot be converted directly into a constant')
+            else:
+                raise NameError(f'{errormsg}Constant "{varname}" cannot be redefined')
     else:
         currline = currline.split('=', 1)
         while currline[1].startswith(' '):
@@ -279,21 +284,28 @@ def const(currline):
         datatype  = defin[0]
         varname = defin[1]
         if varname not in connames and varname not in varnames:
-            datatypes.append(datatype)
-            varnames.append(varname)
+            condatatypes.append(datatype)
+            connames.append(varname)
             currline[1] = currline[1].replace('"', '')
-            varvalues.append(currline[1])
+            convalues.append(currline[1])
         else:
-            raise ValueError
+            if varname in varnames:
+                raise NameError(f'{errormsg}Variable "{varname}" cannot be converted directly into a constant')
+            else:
+                raise NameError(f'{errormsg}Constant "{varname}" cannot be redefined')
 ###########################################PARSER
-def numbercode(filename):
+def numbercode(fname):
+    global currlinenumber, filename, errormsg
+    filename = fname
     if filename.endswith('.ncd'):
         line = 1
         with open(f'{filename}', 'r') as file:
             lines = file.readlines()
         while line <= len(lines):
             currline = lines[line-1]
+            currlinenumber = line
             currline = currline.strip()
+            errormsg = f'\nFILE NAME: {filename}:\nLINE NUMBER: {currlinenumber}:\n'
             if currline.startswith('show'):
                 show(currline)
             elif currline.startswith('var '):
@@ -303,7 +315,7 @@ def numbercode(filename):
             line+=1
 
     else:
-        raise NameError
+        raise NameError('\n File: {filename} not found.')
     
 
 
