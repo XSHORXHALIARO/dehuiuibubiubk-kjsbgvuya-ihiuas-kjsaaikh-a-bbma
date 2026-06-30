@@ -1,8 +1,11 @@
 import math
 global varnames, varvalues, funcnames, funclinerange
-varnames = ['e', 'pi','i']
-varvalues = [math.e, math.pi, complex(0, 1)]
-datatypes = ['real', 'real', 'imaginary']
+varnames = []
+varvalues = []
+datatypes = []
+connames = ['e', 'pi','i']
+convalues = [math.e, math.pi, complex(0, 1)]
+condatatypes = ['real', 'real', 'imaginary']
 funcnames = [] # in built functions
 customfuncnames = [] # user defined function
 customfunclinerange = [] # user defined function line range
@@ -109,6 +112,9 @@ def mysymplify(expression): # maths simplifier ###finished
         if expression[i] in varnames:#variable replacement
             if datatypes[varnames.index(expression[i])] == 'real' or  datatypes[varnames.index(expression[i])] == 'complex' or datatypes[varnames.index(expression[i])] == 'imaginary':
                 expression[i] = varvalues[varnames.index(expression[i])] # replacement
+        elif expression[i] in connames:#constant replacement
+            if condatatypes[connames.index(expression[i])] == 'real' or  condatatypes[connames.index(expression[i])] == 'complex' or condatatypes[connames.index(expression[i])] == 'imaginary':
+                expression[i] = convalues[connames.index(expression[i])]
         try:
             expression[i] = float(expression[i])
         except:
@@ -188,7 +194,10 @@ def show(currline): # show function examines whole line
             except:
                 parts[j] = parts[j]
         else:
-            parts[j] = varvalues[varnames.index(parts[j])]
+            if parts[j] in connames:
+                parts[j] = convalues[connames.index(parts[j])]
+            else:  
+                parts[j] = varvalues[varnames.index(parts[j])]
     print(*parts, sep="")
 ####################################################VARIABLES
 def var(currline):
@@ -200,13 +209,16 @@ def var(currline):
         defin = listclear(defin)
         varname = defin[1]
         datatype  = defin[0]
-        if varname in varnames:
-            datatypes[varnames.index(varname)] = datatype
-            varvalues[varnames.index(varname)] = mysymplify(currline[1])
+        if varname not in connames:
+            if varname in varnames:
+                datatypes[varnames.index(varname)] = datatype
+                varvalues[varnames.index(varname)] = mysymplify(currline[1])
+            else:
+                datatypes.append(datatype)
+                varnames.append(varname)
+                varvalues.append(mysymplify(currline[1]))
         else:
-            datatypes.append(datatype)
-            varnames.append(varname)
-            varvalues.append(mysymplify(currline[1]))
+            raise ValueError
     elif '=' in currline:
         currline = currline.split('=', 1)
         while currline[1].startswith(' '):
@@ -216,25 +228,63 @@ def var(currline):
         defin = listclear(defin)
         datatype  = defin[0]
         varname = defin[1]
-        if varname in varnames:
-            datatypes[varnames.index(varname)] = datatype
-            currline[1] = currline[1].replace('"', '')
-            varvalues[varnames.index(varname)] = currline[1]
+        if varname not in connames:
+            if varname in varnames:
+                datatypes[varnames.index(varname)] = datatype
+                currline[1] = currline[1].replace('"', '')
+                varvalues[varnames.index(varname)] = currline[1]
+            else:
+                datatypes.append(datatype)
+                varnames.append(varname)
+                currline[1] = currline[1].replace('"', '')
+                varvalues.append(currline[1])
         else:
-            datatypes.append(datatype)
-            varnames.append(varname)
-            currline[1] = currline[1].replace('"', '')
-            varvalues.append(currline[1])
+            raise ValueError
     else:
         currline = currline.split(' ')
         currline = listclear(currline)
         datatype  = currline[0]
         varname = currline[1]
-        if varname not in varnames:
+        if varname not in connames:
+            if varname not in varnames:
+                datatypes.append(datatype)
+                varnames.append(varname)
+            else:
+                datatypes[varnames.index(varname)] = datatype
+        else:
+            raise ValueError
+
+def const(currline):
+    currline = currline[6:]
+    if '=' in currline and '"' not in currline:
+        currline = currline.split('=')
+        defin = currline[0]
+        defin = defin.split(' ')
+        defin = listclear(defin)
+        varname = defin[1]
+        datatype  = defin[0]
+        if varname not in connames and varname not in varnames:
             datatypes.append(datatype)
             varnames.append(varname)
+            varvalues.append(mysymplify(currline[1]))
         else:
-            datatypes[varnames.index(varname)] = datatype
+            raise ValueError
+    else:
+        currline = currline.split('=', 1)
+        while currline[1].startswith(' '):
+            currline[1] = currline[1][1:]
+        defin = currline[0]
+        defin = defin.split(' ')
+        defin = listclear(defin)
+        datatype  = defin[0]
+        varname = defin[1]
+        if varname not in connames and varname not in varnames:
+            datatypes.append(datatype)
+            varnames.append(varname)
+            currline[1] = currline[1].replace('"', '')
+            varvalues.append(currline[1])
+        else:
+            raise ValueError
 ###########################################PARSER
 def numbercode(filename):
     if filename.endswith('.ncd'):
@@ -248,6 +298,8 @@ def numbercode(filename):
                 show(currline)
             elif currline.startswith('var '):
                 var(currline)
+            elif currline.startswith('const '):
+                const(currline)
             line+=1
 
     else:
