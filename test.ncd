@@ -1,2 +1,3 @@
-var string w =                                                                                                                                      "World" 
-show( w )
+var imaginary num = i
+var complex newnum = num*2
+show(newnum)

@@ -10,12 +10,32 @@ condatatypes = ['real', 'real', 'imaginary']
 funcnames = [] # in built functions
 customfuncnames = [] # user defined function
 customfunclinerange = [] # user defined function line range
+global currunitmode, unitmodes
 unitmodes = ['SI', 'IMPERIAL', 'NATURAL', 'STONEY', 'PLANCK'] # overall units for quantities
+currunitmode = ['SI']
 currlinenumber = 0
 errormsg = f'\nFILE NAME: {filename}:\nLINE NUMBER: {currlinenumber}:\n'
-
-
-
+class Complex:
+    def __init__(self, real, imag):
+        self.real = real
+        self.imag = imag
+    def __repr__(self):
+        if self.real != 0:
+            if self.imag < 0:
+                newimag = abs(self.imag)
+                return f'{self.real} - {newimag}'
+            elif self.imag == 0:
+                return f'{self.real}'
+            else:
+                return f'{self.real} + {self.imag}'
+        else:
+            if self.imag < 0:
+                newimag = abs(self.imag)
+                return f'- {newimag}'
+            elif self.imag == 0:
+                return f'0'
+            else:
+                return f'{self.imag}' 
 
 
 
